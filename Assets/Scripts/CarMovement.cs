@@ -63,7 +63,7 @@ public class CarMovement : MonoBehaviour
         EventTrigger.Entry downEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
         downEntry.callback.AddListener((data) => { buttonDirection = dir; });
         trigger.triggers.Add(downEntry);
-
+        
         // PointerUp = stop steering
         EventTrigger.Entry upEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
         upEntry.callback.AddListener((data) => { buttonDirection = 0; });
