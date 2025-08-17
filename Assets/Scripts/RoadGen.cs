@@ -4,46 +4,67 @@ using UnityEngine;
 
 public class RoadGen : MonoBehaviour
 {
+    [System.Serializable]
+    public class SegmentSet
+    {
+        public GameObject segmentPrefab;   
+        public float duration = 10f;       
+    }
+
     [Header("Segment Settings")]
-    public GameObject segmentPrefab;        // Prefab of your segment
-    public Transform spawnPoint;            // Where new segments spawn
-    public float segmentLength = 20f;       // Distance between segments
-    public float spawnInterval = 2f;        // Time between spawns (seconds)
+    public Transform spawnPoint;             
+    public float segmentLength = 20f;        
+    public float spawnInterval = 2f;         
 
     [Header("Cleanup Settings")]
-    public float segmentLifetime = 10f;     // How long before old segments are deleted
+    public float segmentLifetime = 10f;      
+
+    [Header("Sequence Settings")]
+    public SegmentSet[] segmentSequence;     
 
     private Queue<GameObject> activeSegments = new Queue<GameObject>();
-    private float timer;
+    private float spawnTimer;
+    private float setTimer;
+    private int currentSetIndex = 0;
 
     void Update()
     {
-        timer += Time.deltaTime;
+        if (segmentSequence.Length == 0) return;
+
+        spawnTimer += Time.deltaTime;
+        setTimer += Time.deltaTime;
 
         // Spawn segments at intervals
-        if (timer >= spawnInterval)
+        if (spawnTimer >= spawnInterval)
         {
-            SpawnSegment();
-            timer = 0f;
+            SpawnSegment(segmentSequence[currentSetIndex].segmentPrefab);
+            spawnTimer = 0f;
+        }
+
+        // Move to next set after its duration
+        if (setTimer >= segmentSequence[currentSetIndex].duration)
+        {
+            currentSetIndex++;
+            if (currentSetIndex >= segmentSequence.Length)
+                currentSetIndex = 0; 
+
+            setTimer = 0f;
         }
     }
 
-    void SpawnSegment()
+    void SpawnSegment(GameObject prefab)
     {
-        // Spawn new segment
-        GameObject newSegment = Instantiate(segmentPrefab, spawnPoint.position, Quaternion.identity);
+        GameObject newSegment = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
 
-        // Add to queue for cleanup
+       
         activeSegments.Enqueue(newSegment);
-
-        // Move spawn point forward
+  
         spawnPoint.position += Vector3.forward * segmentLength;
 
-        // Schedule deletion after lifetime
         StartCoroutine(DeleteAfterTime(newSegment, segmentLifetime));
     }
 
-    System.Collections.IEnumerator DeleteAfterTime(GameObject segment, float delay)
+    IEnumerator DeleteAfterTime(GameObject segment, float delay)
     {
         yield return new WaitForSeconds(delay);
 
