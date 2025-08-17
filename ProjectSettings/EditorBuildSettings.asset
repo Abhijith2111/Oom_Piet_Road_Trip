@@ -12,7 +12,12 @@ EditorBuildSettings:
     path: Assets/Scenes/GamePage.unity
     guid: c850ee8c3b14cc8459e7e186857cf567
   m_configObjects:
+<<<<<<< HEAD
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: b03cac38cbb94dd4da9cea20ba81568a,
       type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000,
       guid: 16476681aa90add4b8e4d99823951564, type: 2}
+=======
+    com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000,
+      guid: 7708eddcfe238964190a8f41c277a1de, type: 2}
+>>>>>>> e40aa1a87f778f500f7fa5580bbce820602b44fa
