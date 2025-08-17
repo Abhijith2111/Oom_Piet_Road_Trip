@@ -4,57 +4,66 @@ using UnityEngine;
 
 public class RoadGen : MonoBehaviour
 {
-    [Header("Segments")]
-    public GameObject segment1Prefab;   // Segment1 prefab
-    public GameObject segment2Prefab;   // Segment2 prefab
-    public Transform spawnPoint;        // Where new segments spawn
-    public float segmentLength = 20f;   // Distance between segments
+    [Header("Segments (Scene Objects as Templates)")]
+    public GameObject segment1;   
+    public GameObject segment2;   
+    public Transform spawnPoint;  
 
     [Header("Player Reference")]
-    public Transform player; // Used for cleanup timing
+    public Transform player;
 
     private Queue<GameObject> activeSegments = new Queue<GameObject>();
     private bool segment2Spawned = false;
 
     void Start()
-    {
-        // Spawn 5 Segment1s at the start
+    {=
         for (int i = 0; i < 5; i++)
         {
-            SpawnSegment(segment1Prefab);
+            SpawnSegment(segment1);
         }
 
-        // Schedule Segment2 after 20s
         Invoke("SpawnSegment2", 20f);
     }
 
-    void SpawnSegment(GameObject prefab)
+    void SpawnSegment(GameObject template)
     {
-        GameObject newSegment = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
-        activeSegments.Enqueue(newSegment);
+        void SpawnSegment(GameObject template)
+        {
+            if (template == null) return;
 
-        // Move spawn point forward for next segment
-        spawnPoint.position += Vector3.forward * segmentLength;
+            GameObject newSegment = Instantiate(template);
+            newSegment.SetActive(true);
+
+            float spawnY = template.transform.position.y;
+
+            newSegment.transform.position = new Vector3(0f, spawnY, spawnPoint.position.z);
+
+            activeSegments.Enqueue(newSegment);
+
+            float segLength = GetSegmentLength(template);
+            spawnPoint.position += Vector3.forward * segLength;
+
+            Debug.Log($"Spawned {template.name} at {newSegment.transform.position}, length={segLength}");
+        }
+
     }
 
     void SpawnSegment2()
     {
         if (!segment2Spawned)
         {
-            SpawnSegment(segment2Prefab);
+            SpawnSegment(segment2);
             segment2Spawned = true;
         }
     }
 
     public void OnPlayerEnterNewSegment()
     {
-        // Spawn next segment (Segment1 unless Segment2 hasn’t been spawned yet and timer triggered)
         if (segment2Spawned)
         {
-            SpawnSegment(segment1Prefab);
+            SpawnSegment(segment1);
         }
 
-        // Delete oldest segment after 3 seconds
         if (activeSegments.Count > 0)
         {
             GameObject oldSegment = activeSegments.Dequeue();
@@ -68,6 +77,20 @@ public class RoadGen : MonoBehaviour
         if (segment != null)
         {
             Destroy(segment);
+        }
+    }
+
+    float GetSegmentLength(GameObject segment)
+    {
+        Renderer rend = segment.GetComponentInChildren<Renderer>();
+        if (rend != null)
+        {
+            return rend.bounds.size.z;
+        }
+        else
+        {
+            Debug.LogWarning($"No Renderer found on {segment.name}, defaulting length to 20");
+            return 20f;
         }
     }
 }

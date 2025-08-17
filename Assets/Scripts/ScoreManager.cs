@@ -18,7 +18,7 @@ public class ScoreManager : MonoBehaviour
         public void AddScore(int amount)
         {
             score += amount;
-            scoreText.text = "CARS DODGED: 0" + score;
+            scoreText.text = "CARS DODGED: " + score;
         }
     
 
